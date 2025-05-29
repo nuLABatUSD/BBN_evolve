@@ -1,11 +1,7 @@
-.ipynb_checkpoints
-__pycache__
-.DS_Store
-*.png
-*.pdf
-*.npz
-*.mp4
-*.csv
+.ipynb_checkpoints/*
 Untitled*
-*.exe
 untitled*
+__pycache__/*
+*.out
+.DS_Store
+*.x
