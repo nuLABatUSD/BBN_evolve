@@ -26,9 +26,9 @@ def f(x, y, p):
     
     der = np.zeros(4) # der is an array of length 4 that has dA/dt, dB/dt, dC/dt, dD/dt
     
-    der[0] = y[1]
-    der[1] = y[2]
-    der[2] = y[3]
-    der[3] = np.pi**4 * y[0]
+    der[0] = B
+    der[1] = C
+    der[2] = D
+    der[3] = np.pi**4 * A
     
     return der
