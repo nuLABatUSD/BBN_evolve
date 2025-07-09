@@ -1,5 +1,5 @@
 import numpy as np
-import thermodynamics as thermo
+
 ######################
 #
 # to be used in conjuction with ODESolve.py
@@ -20,16 +20,15 @@ import thermodynamics as thermo
 # dC/dt = D
 # dD/dt = pi^4 A
 #####################
-def f(a, y, p):
+def f(x, y, p):
     
-    T, p, P, s = y  # y is an array of length 4, and its values are A, B, C, D
+    A, B, C, D = y  # y is an array of length 4, and its values are A, B, C, D
     
     der = np.zeros(4) # der is an array of length 4 that has dA/dt, dB/dt, dC/dt, dD/dt
     
-    der[0] = -T/a
-    der[1] = thermo.dpdT(T,0.511,2)*der[0]
-    der[2] = thermo.dPdT(T,0.511,2)*der[0]
-    der[3] = thermo.dsdT(T,0.511,2)*der[0]
-    
+    der[0] = B
+    der[1] = C
+    der[2] = D
+    der[3] = np.pi**4 * A
     
     return der
