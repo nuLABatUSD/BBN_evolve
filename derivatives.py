@@ -20,16 +20,30 @@ import thermodynamics as thermo
 # dC/dt = D
 # dD/dt = pi^4 A
 #####################
-def f(a, y, p):
+
+def sth(T):
+    sth=((2*np.pi**2*2*T**3)/45)+thermo.s(T,0.511,2)+thermo.s(T,0.511,2)
+    return sth
+
+
+def dsthdT(T):
+    dsthdT=(6*np.pi**2*2*T**2)/45+thermo.dsdT(T,0.511,2)+thermo.dsdT(T,0.511,2)
+    return dsthdT
+
+
+def ptot(T,a):
+    ptot=(np.pi**2*2*T**4)/30+thermo.p(T,0.511,2)+thermo.p(T,0.511,2)+thermo.p(1/a,0,6)
+    return ptot
     
-    T, p, P, s = y  # y is an array of length 4, and its values are A, B, C, D
-    
-    der = np.zeros(4) # der is an array of length 4 that has dA/dt, dB/dt, dC/dt, dD/dt
-    
-    der[0] = -T/a
-    der[1] = thermo.dpdT(T,0.511,2)*der[0]
-    der[2] = thermo.dPdT(T,0.511,2)*der[0]
-    der[3] = thermo.dsdT(T,0.511,2)*der[0]
-    
+
+def f(a,y,p):
+   
+    T,t=y
+    der = np.zeros(2)
+   
+    der[0] = -(3*a**2*sth(T))/(a**3*dsthdT(T))
+    der[1] = (1/a)*((8*np.pi*ptot(T,a))/(3*(1.22*10**28)**2))**(1/2)
+
     
     return der
+
