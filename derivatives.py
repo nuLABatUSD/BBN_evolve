@@ -42,7 +42,7 @@ def f(a,y,p):
     der = np.zeros(2)
    
     der[0] = -(3*a**2*sth(T))/(a**3*dsthdT(T))
-    der[1] = (1/a)*((8*np.pi*ptot(T,a))/(3*(1.22*10**28)**2))**(1/2)
+    der[1] = (1/a)*((8*np.pi*ptot(T,a))/(3*(1.22*10**22)**2))**(1/2)
 
     
     return der
