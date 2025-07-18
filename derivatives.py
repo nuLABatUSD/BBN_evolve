@@ -1,5 +1,8 @@
 import numpy as np
 import thermodynamics as thermo
+from constants import me, mpl
+import weakrates as weak
+import expansion as ex
 ######################
 #
 # to be used in conjuction with ODESolve.py
@@ -21,28 +24,21 @@ import thermodynamics as thermo
 # dD/dt = pi^4 A
 #####################
 
-def sth(T):
-    sth=((2*np.pi**2*2*T**3)/45)+thermo.s(T,0.511,2)+thermo.s(T,0.511,2)
-    return sth
+#Hubble expansion rate
 
 
-def dsthdT(T):
-    dsthdT=(6*np.pi**2*2*T**2)/45+thermo.dsdT(T,0.511,2)+thermo.dsdT(T,0.511,2)
-    return dsthdT
 
-
-def ptot(T,a):
-    ptot=(np.pi**2*2*T**4)/30+thermo.p(T,0.511,2)+thermo.p(T,0.511,2)+thermo.p(1/a,0,6)
-    return ptot
     
 
 def f(a,y,p):
    
-    T,t=y
-    der = np.zeros(2)
+    T , t , Yp , Yn = y
+    der = np.zeros(4)
    
-    der[0] = -(3*a**2*sth(T))/(a**3*dsthdT(T))
-    der[1] = (1/a)*((8*np.pi*ptot(T,a))/(3*(1.22*10**22)**2))**(1/2)
+    der[0] = -(3*a**2*ex.sth(T))/(a**3*ex.dsthdT(T))
+    der[1] = (1/a)*((8*np.pi*ex.ptot(T,a))/(3*(mpl)**2))**(1/2)
+    der[2] = (y[3]*weak.Nnptot(T,a)-y[2]*weak.Npntot(T,a))*der[1]
+    der[3] = (-y[3]*weak.Nnptot(T,a)+y[2]*weak.Npntot(T,a))*der[1]
 
     
     return der
