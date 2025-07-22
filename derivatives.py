@@ -32,13 +32,14 @@ import expansion as ex
 
 def f(a,y,p):
    
-    T , t , Yp , Yn = y
+    T , t , Yp , Yn , eta = y
     der = np.zeros(4)
    
     der[0] = -(3*a**2*ex.sth(T))/(a**3*ex.dsthdT(T))
-    der[1] = (1/a)*((8*np.pi*ex.ptot(T,a))/(3*(mpl)**2))**(1/2)
+    der[1] = (1/a)*(((8*np.pi*ex.ptot(T,a))/(3*(mpl)**2)))**(-1/2)
     der[2] = (y[3]*weak.Nnptot(T,a)-y[2]*weak.Npntot(T,a))*der[1]
     der[3] = (-y[3]*weak.Nnptot(T,a)+y[2]*weak.Npntot(T,a))*der[1]
+    der[4] = -3*eta*((1/T)*der[0]+(1/a))
 
     
     return der
