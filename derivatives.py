@@ -33,7 +33,7 @@ import expansion as ex
 def f(a,y,p):
    
     T , t , Yp , Yn , eta = y
-    der = np.zeros(4)
+    der = np.zeros(5)
    
     der[0] = -(3*a**2*ex.sth(T))/(a**3*ex.dsthdT(T))
     der[1] = (1/a)*(((8*np.pi*ex.ptot(T,a))/(3*(mpl)**2)))**(-1/2)

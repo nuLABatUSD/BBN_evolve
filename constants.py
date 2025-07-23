@@ -11,3 +11,7 @@ gA = 1.27           # axial-vector coupling
 dmnp = 1.293        # neutron-proton mass difference
 
 hbar = 6.58e-22     #ħ
+
+mN = 940            #nucleon mass
+
+zeta3 = 1.2020569031595942854  #Apery's constant
