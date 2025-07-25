@@ -1,6 +1,8 @@
 #NSE abundance
 
 import numpy as np
+from constants import zeta3, mN
+
 
 # multiplicity, binding energy, atomic number, mass number
 g = np.array([2, 2 ,3, 2, 2, 1, 4, 4, 3], dtype=np.double)
@@ -25,7 +27,7 @@ def nse(T, eta, Yp, Yn):
     
     for i in range(len(nse)):
         nB = eta*(3/2)*zeta3*T**3
-        epsilon=(1/2)*((2*np.pi)/mN*T)**(3/2)*nB
+        epsilon=(1/2)*((2*np.pi)/(mN*T))**(3/2)*nB
         nse[i]=(1/2)*Yp**Z[i]*Yn**(A[i]-Z[i])*g[i]*A[i]**(3/2)*epsilon**(A[i]-1)*np.exp(B[i]/T)
         
     return nse
