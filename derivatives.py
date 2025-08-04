@@ -1,6 +1,6 @@
 import numpy as np
 import thermodynamics as thermo
-from constants import me, mpl
+from constants import me, mpl, zeta3, MeVtoT9, cmgstoMeV, mN
 import weakrates as weak
 import expansion as ex
 import nseabundance as nse
@@ -25,9 +25,6 @@ import nseabundance as nse
 # dD/dt = pi^4 A
 #####################
 
-#Hubble expansion rate
-
-# outputs first 3 elements of array and then an array of the last 9
 def sep(z):
     return z[0], z[1], z[2], z[3:]
 T,t,eta,A = sep(np.arange(12))
@@ -35,10 +32,23 @@ T,t,eta,A = sep(np.arange(12))
 #creates array of 12 dependent variables
 def depvar(T,t,eta,A):
     return np.concatenate((np.array([T,t,eta]), A))
+
+def pngd(T):
+    T9 = T*MeVtoT9
+    if T9<=1.5:
+        F = 44216.*(1+3.75191*T9+1.92934*T9*T9+0.746503*T9*T9*T9+0.0197023*(T9**4)+3.00491e-6*(T9**5))/(1+5.4678*T9+5.62395*T9*T9+0.489312*T9*T9*T9+0.00747806*(T9**4))
+    else:
+        F = (1.-np.sqrt(T9)*0.8504+T9*0.4895-(T9**(3/2))*0.09623+T9*0.008471*T9-T9*2.8e-4*(T9**(3/2)))*47420
+    return F*cmgstoMeV*mN
     
 
 def f(a,y,p):
     T, t, eta, A = sep(y)
+    nB = eta*(3/2)*zeta3*T**3
+    Gammaf = pngd(T)*nB
+    A_NSE = nse.nse(T, eta, A[nse.P_INDEX], A[nse.N_INDEX])
+    Gammar = Gammaf*((A_NSE[nse.P_INDEX]*A_NSE[nse.N_INDEX])/A_NSE[nse.H2_INDEX])
+  
     der=np.zeros(3)
     d=np.zeros(9)
 
@@ -48,9 +58,14 @@ def f(a,y,p):
 
     d[nse.P_INDEX] += A[nse.N_INDEX]*weak.Nnptot(T,a)
     d[nse.P_INDEX] -= A[nse.P_INDEX]*weak.Npntot(T,a)
+    d[nse.P_INDEX] -= A[nse.P_INDEX]*A[nse.N_INDEX]*Gammaf
+    d[nse.P_INDEX] += A[nse.H2_INDEX]*Gammar
     d[nse.N_INDEX] -= A[nse.N_INDEX]*weak.Nnptot(T,a)
     d[nse.N_INDEX] += A[nse.P_INDEX]*weak.Npntot(T,a)
-    d[nse.H2_INDEX] = 0
+    d[nse.N_INDEX] -= A[nse.P_INDEX]*A[nse.N_INDEX]*Gammaf
+    d[nse.N_INDEX] += A[nse.H2_INDEX]*Gammar
+    d[nse.H2_INDEX] += A[nse.P_INDEX]*A[nse.N_INDEX]*Gammaf
+    d[nse.H2_INDEX] -= A[nse.H2_INDEX]*Gammar
     d[nse.H3_INDEX] = 0
     d[nse.HE3_INDEX] = 0
     d[nse.HE4_INDEX] = 0
