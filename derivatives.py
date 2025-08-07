@@ -40,14 +40,23 @@ def pngd(T):
     else:
         F = (1.-np.sqrt(T9)*0.8504+T9*0.4895-(T9**(3/2))*0.09623+T9*0.008471*T9-T9*2.8e-4*(T9**(3/2)))*47420
     return F*cmgstoMeV*mN
-    
+
+def tpga(T):
+    T9 = T*MeVtoT9
+    F = T9**(-2/3)*2.2e4*np.exp(-3.869/(T9**(1/3)))*((T9**(1/3))*0.108+1.+(T9**(2/3))*1.68+T9*1.26+(T9**(4/3))*0.551+(T9**(5/3))*1.06)
+
+    return F*cmgstoMeV*mN
 
 def f(a,y,p):
     T, t, eta, A = sep(y)
     nB = eta*(3/2)*zeta3*T**3
-    Gammaf = pngd(T)*nB
+    Gamma_f=np.zeros(2)
+    Gamma_f[nse.PNGD_INDEX] = pngd(T)*nB
+    Gamma_f[nse.TPGA_INDEX] = tpga(T)*nB
     A_NSE = nse.nse(T, eta, A[nse.P_INDEX], A[nse.N_INDEX])
-    Gammar = Gammaf*((A_NSE[nse.P_INDEX]*A_NSE[nse.N_INDEX])/A_NSE[nse.H2_INDEX])
+    Gamma_r=np.zeros(2)
+    Gamma_r[nse.PNGD_INDEX] = Gamma_f[nse.PNGD_INDEX]*((A_NSE[nse.P_INDEX]*A_NSE[nse.N_INDEX])/A_NSE[nse.H2_INDEX])
+    Gamma_r[nse.TPGA_INDEX] = Gamma_f[nse.TPGA_INDEX]*((A_NSE[nse.P_INDEX]*A_NSE[nse.N_INDEX])/A_NSE[nse.H2_INDEX])
   
     der=np.zeros(3)
     d=np.zeros(9)
@@ -55,22 +64,27 @@ def f(a,y,p):
     der[0] = -(3*a**2*ex.sth(T))/(a**3*ex.dsthdT(T))
     der[1] = (1/a)*((8*np.pi*ex.ptot(T,a))/(3*(mpl)**2))**(-1/2)
     der[2] = -3*eta*((1/T)*der[0]+(1/a))
-
+    
     d[nse.P_INDEX] += A[nse.N_INDEX]*weak.Nnptot(T,a)
     d[nse.P_INDEX] -= A[nse.P_INDEX]*weak.Npntot(T,a)
-    d[nse.P_INDEX] -= A[nse.P_INDEX]*A[nse.N_INDEX]*Gammaf
-    d[nse.P_INDEX] += A[nse.H2_INDEX]*Gammar
     d[nse.N_INDEX] -= A[nse.N_INDEX]*weak.Nnptot(T,a)
     d[nse.N_INDEX] += A[nse.P_INDEX]*weak.Npntot(T,a)
-    d[nse.N_INDEX] -= A[nse.P_INDEX]*A[nse.N_INDEX]*Gammaf
-    d[nse.N_INDEX] += A[nse.H2_INDEX]*Gammar
-    d[nse.H2_INDEX] += A[nse.P_INDEX]*A[nse.N_INDEX]*Gammaf
-    d[nse.H2_INDEX] -= A[nse.H2_INDEX]*Gammar
     d[nse.H3_INDEX] = 0
     d[nse.HE3_INDEX] = 0
     d[nse.HE4_INDEX] = 0
     d[nse.BE7_INDEX] = 0
     d[nse.LI7_INDEX] = 0
     d[nse.LI6_INDEX] = 0
+    
+    if (p==1):
+        d[nse.P_INDEX] -= A[nse.P_INDEX]*A[nse.N_INDEX]*Gamma_f[nse.PNGD_INDEX]
+        d[nse.P_INDEX] += A[nse.H2_INDEX]*Gamma_r[nse.PNGD_INDEX]
+        d[nse.N_INDEX] -= A[nse.P_INDEX]*A[nse.N_INDEX]*Gamma_f[nse.PNGD_IDEX]
+        d[nse.N_INDEX] += A[nse.H2_INDEX]*Gamma_r[nse.PNGD_INDEX]
+        d[nse.H2_INDEX] += A[nse.P_INDEX]*A[nse.N_INDEX]*Gamma_f[nse.PNGD_INDEX]
+        d[nse.H2_INDEX] -= A[nse.H2_INDEX]*Gamma_r[nse.PNGD_INDEX]
+        
 
     return depvar(der[0], der[1], der[2], d*der[1])
+        
+
