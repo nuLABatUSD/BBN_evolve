@@ -70,9 +70,11 @@ def RKCK_step(x, y, dx, p):
         
     return x_next, y5, dx_try
     
-eps = 1e-8
-TINY = 1e-40
+#eps = 1e-8
+#TINY = 1e-40
 Safety = 0.9
+eps = 1e-4
+TINY = 1e-25
 
 #@nb.jit(nopython=True)
 def step_accept(y, y5, y4, dx):
