@@ -50,16 +50,26 @@ def tpga(T):
 def f(a,y,p):
     T, t, eta, A = sep(y)
     nB = eta*(3/2)*zeta3*T**3
+   
     Gamma_f=np.zeros(2)
+    fwd1 = np.zeros(2, dtype=int)
+    fwd2 = np.zeros(2, dtype=int)
+    rev = np.zeros(2, dtype=int)
+    Gamma_r=np.zeros(2)
+    
     Gamma_f[nse.PNGD_INDEX] = pngd(T)*nB
     Gamma_f[nse.TPGA_INDEX] = tpga(T)*nB
+    fwd1[nse.PNGD_INDEX] = nse.P_INDEX
+    fwd1[nse.TPGA_INDEX] = nse.H2_INDEX
+    fwd2[nse.PNGD_INDEX] = nse.N_INDEX
+    fwd2[nse.TPGA_INDEX] = nse.P_INDEX
+    rev[nse.PNGD_INDEX] = nse.H2_INDEX
+    rev[nse.TPGA_INDEX] = nse.HE4_INDEX
+   
     A_NSE = nse.nse(T, eta, A[nse.P_INDEX], A[nse.N_INDEX])
-    Gamma_r=np.zeros(2)
-    Gamma_r[nse.PNGD_INDEX] = Gamma_f[nse.PNGD_INDEX]*((A_NSE[nse.P_INDEX]*A_NSE[nse.N_INDEX])/A_NSE[nse.H2_INDEX])
-    Gamma_r[nse.TPGA_INDEX] = Gamma_f[nse.TPGA_INDEX]*((A_NSE[nse.P_INDEX]*A_NSE[nse.N_INDEX])/A_NSE[nse.H2_INDEX])
-  
-    der=np.zeros(3)
     d=np.zeros(9)
+    
+    der=np.zeros(3)
 
     der[0] = -(3*a**2*ex.sth(T))/(a**3*ex.dsthdT(T))
     der[1] = (1/a)*((8*np.pi*ex.ptot(T,a))/(3*(mpl)**2))**(-1/2)
@@ -79,12 +89,29 @@ def f(a,y,p):
     if (p==1):
         d[nse.P_INDEX] -= A[nse.P_INDEX]*A[nse.N_INDEX]*Gamma_f[nse.PNGD_INDEX]
         d[nse.P_INDEX] += A[nse.H2_INDEX]*Gamma_r[nse.PNGD_INDEX]
-        d[nse.N_INDEX] -= A[nse.P_INDEX]*A[nse.N_INDEX]*Gamma_f[nse.PNGD_IDEX]
+        d[nse.N_INDEX] -= A[nse.P_INDEX]*A[nse.N_INDEX]*Gamma_f[nse.PNGD_INDEX]
         d[nse.N_INDEX] += A[nse.H2_INDEX]*Gamma_r[nse.PNGD_INDEX]
         d[nse.H2_INDEX] += A[nse.P_INDEX]*A[nse.N_INDEX]*Gamma_f[nse.PNGD_INDEX]
         d[nse.H2_INDEX] -= A[nse.H2_INDEX]*Gamma_r[nse.PNGD_INDEX]
-        
+        d[nse.H3_INDEX] += A[nse.H3_INDEX]*A[nse.P_INDEX]*Gamma_f[nse.TPGA_INDEX]
+        d[nse.H3_INDEX] -= A[nse.HE4_INDEX]*Gamma_r[nse.TPGA_INDEX]
+        d[nse.P_INDEX] -= A[nse.H3_INDEX]*A[nse.P_INDEX]*Gamma_f[nse.TPGA_INDEX]
+        d[nse.P_INDEX] += A[nse.HE4_INDEX]*Gamma_r[nse.TPGA_INDEX]
+        d[nse.HE4_INDEX] += A[nse.H3_INDEX]*A[nse.P_INDEX]*Gamma_f[nse.TPGA_INDEX]
+        d[nse.HE4_INDEX] -= A[nse.HE4_INDEX]*Gamma_r[nse.TPGA_INDEX]
 
+    if (p==2):
+        for i in range(2):
+            Gamma_r[i] = Gamma_f[i]*((A_NSE[fwd1[i]]*A_NSE[fwd2[i]])/A_NSE[rev[i]])
+            d[fwd1[i]] -= A[fwd1[i]]*A[fwd2[i]]*Gamma_f[i]
+            d[fwd1[i]] += A[rev[i]]*Gamma_r[i]
+            d[fwd2[i]] -= A[fwd1[i]]*A[fwd2[i]]*Gamma_f[i]
+            d[fwd2[i]] += A[rev[i]]*Gamma_r[i]
+            d[rev[i]] +=A[fwd1[i]]*A[fwd2[i]]*Gamma_f[i]
+            d[rev[i]] -= A[rev[i]]*Gamma_r[i]
+            
+  
     return depvar(der[0], der[1], der[2], d*der[1])
+        
         
 
