@@ -4,7 +4,7 @@ from nseabundance import P_INDEX, N_INDEX
 import numba as nb
 
 @nb.njit()
-def linearize(Ab, d_full, dtda, a, Lambda_pn, Lambda_np, x_gamma_forward_rates, x_gamma_reverse_rates, x_gamma_index):
+def linearize(Ab, d_full, dtda, a, Lambda_pn, Lambda_np, x_gamma_forward_rates, x_gamma_reverse_rates, x_gamma_index, xy_forward_rates=None, xy_reverse_rates=None, xy_index=None):
     dt = dtda * a * 0.0001
     M = np.zeros((9,9))
     M[P_INDEX, P_INDEX] += - Lambda_pn
@@ -28,6 +28,29 @@ def linearize(Ab, d_full, dtda, a, Lambda_pn, Lambda_np, x_gamma_forward_rates, 
         M[x_gamma_index[i,2], x_gamma_index[i,1]] += x_gamma_forward_rates[i] * Ab[x_gamma_index[i,0]] / 2
         M[x_gamma_index[i,2], x_gamma_index[i,2]] += - x_gamma_reverse_rates[i]
 
+    if xy_forward_rates != None:
+        N_xy_rates = len(xy_forward_rates)
+        for i in range(N_xy_rates):
+            M[xy_index[i,0], xy_index[i,0]] += - xy_forward_rates[i] * Ab[xy_index[i,1]] / 2
+            M[xy_index[i,0], xy_index[i,1]] += - xy_forward_rates[i] * Ab[xy_index[i,0]] / 2
+            M[xy_index[i,0], xy_index[i,2]] += xy_reverse_rates[i] * Ab[xy_index[i,3]] / 2
+            M[xy_index[i,0], xy_index[i,3]] += xy_reverse_rates[i] * Ab[xy_index[i,2]] / 2
+
+            M[xy_index[i,1], xy_index[i,0]] += - xy_forward_rates[i] * Ab[xy_index[i,1]] / 2
+            M[xy_index[i,1], xy_index[i,1]] += - xy_forward_rates[i] * Ab[xy_index[i,0]] / 2
+            M[xy_index[i,1], xy_index[i,2]] += xy_reverse_rates[i] * Ab[xy_index[i,3]] / 2
+            M[xy_index[i,1], xy_index[i,3]] += xy_reverse_rates[i] * Ab[xy_index[i,2]] / 2
+
+            M[xy_index[i,2], xy_index[i,0]] += xy_forward_rates[i] * Ab[xy_index[i,1]] / 2
+            M[xy_index[i,2], xy_index[i,1]] += xy_forward_rates[i] * Ab[xy_index[i,0]] / 2
+            M[xy_index[i,2], xy_index[i,2]] += - xy_reverse_rates[i] * Ab[xy_index[i,3]] / 2
+            M[xy_index[i,2], xy_index[i,3]] += - xy_reverse_rates[i] * Ab[xy_index[i,2]] / 2
+    
+            M[xy_index[i,3], xy_index[i,0]] += xy_forward_rates[i] * Ab[xy_index[i,1]] / 2
+            M[xy_index[i,3], xy_index[i,1]] += xy_forward_rates[i] * Ab[xy_index[i,0]] / 2
+            M[xy_index[i,3], xy_index[i,2]] += - xy_reverse_rates[i] * Ab[xy_index[i,3]] / 2
+            M[xy_index[i,3], xy_index[i,3]] += - xy_reverse_rates[i] * Ab[xy_index[i,2]] / 2
+    
     D_mat = np.identity(9) - M * dt
 
     #print(np.linalg.inv(D_mat))
