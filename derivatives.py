@@ -36,29 +36,15 @@ def depvar(T,t,eta,A):
     return np.concatenate((np.array([T,t,eta]), A))
 
 
+
 def f(a,y,p):
     T, t, eta, A = sep(y)
     nB = eta*(3/2)*zeta3*T**3
-   
-    Gamma_f=np.zeros(xg.Nrxn)
-    fwd1 = np.zeros(xg.Nrnx, dtype=int)
-    fwd2 = np.zeros(xg.Nrxn, dtype=int)
-    rev = np.zeros(xg.Nrxn, dtype=int)
-    Gamma_r=np.zeros(xg.Nrxn)
-    
-    Gamma_f[nse.PNGD_INDEX] = pngd(T)*nB
-    Gamma_f[nse.TPGA_INDEX] = tpga(T)*nB
-    fwd1[nse.PNGD_INDEX] = nse.P_INDEX
-    fwd1[nse.TPGA_INDEX] = nse.H2_INDEX
-    fwd2[nse.PNGD_INDEX] = nse.N_INDEX
-    fwd2[nse.TPGA_INDEX] = nse.P_INDEX
-    rev[nse.PNGD_INDEX] = nse.H2_INDEX
-    rev[nse.TPGA_INDEX] = nse.HE4_INDEX
 
-    
-    A_NSE = nse.nse(T, eta, A[nse.P_INDEX], A[nse.N_INDEX])
+  
+    Gamma_f, Gamma_r = xg.Gamma(T, eta, A[nse.P_INDEX], A[nse.N_INDEX])
+  
     d=np.zeros(9)
-    
     der=np.zeros(3)
 
     der[0] = -(3*a**2*ex.sth(T))/(a**3*ex.dsthdT(T))
@@ -93,14 +79,14 @@ def f(a,y,p):
     if (p==2):
         for i in range(9):
             
-            d[fwd1[i]] -= A[fwd1[i]]*A[fwd2[i]]*Gamma_f[i]
-            d[fwd1[i]] += A[rev[i]]*Gamma_r[i]
-            d[fwd2[i]] -= A[fwd1[i]]*A[fwd2[i]]*Gamma_f[i]
-            d[fwd2[i]] += A[rev[i]]*Gamma_r[i]
-            d[rev[i]] +=A[fwd1[i]]*A[fwd2[i]]*Gamma_f[i]
-            d[rev[i]] -= A[rev[i]]*Gamma_r[i]
+            d[xg.fwd1[i]] -= A[xg.fwd1[i]]*A[xg.fwd2[i]]*Gamma_f[i]
+            d[xg.fwd1[i]] += A[xg.rev[i]]*Gamma_r[i]
+            d[xg.fwd2[i]] -= A[xg.fwd1[i]]*A[xg.fwd2[i]]*Gamma_f[i]
+            d[xg.fwd2[i]] += A[xg.rev[i]]*Gamma_r[i]
+            d[xg.rev[i]] +=A[xg.fwd1[i]]*A[xg.fwd2[i]]*Gamma_f[i]
+            d[xg.rev[i]] -= A[xg.rev[i]]*Gamma_r[i]
 
-        d = linearize(A, d, der[1], a, weak.Npntot(T,a), weak.Nnptot(T,a), Gamma_f, Gamma_r, indexes)
+        d = linearize(A, d, der[1], a, weak.Npntot(T,a), weak.Nnptot(T,a), Gamma_f, Gamma_r, xg.indexes)
   
     return depvar(der[0], der[1], der[2], d*der[1])
         
