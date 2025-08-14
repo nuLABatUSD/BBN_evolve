@@ -1,5 +1,5 @@
 #NSE abundance
-
+import numba as nb
 import numpy as np
 from constants import zeta3, mN
 
@@ -23,7 +23,7 @@ LI6_INDEX = 8
 PNGD_INDEX = 0
 TPGA_INDEX = 1
 
-
+@nb.njit()
 # NSE function
 def nse(T, eta, Yp, Yn):
   

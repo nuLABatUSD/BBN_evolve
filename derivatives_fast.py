@@ -1,4 +1,4 @@
-
+import numba as nb
 import numpy as np
 import thermodynamics as thermo
 from constants import me, mpl, zeta3, MeVtoT9, cmgstoMeV, mN
@@ -7,7 +7,6 @@ import expansion as ex
 import nseabundance as nse
 from BBN_linearize import linearize
 import xgamma_reactions as xg
-import xy_reactions as xy
 ######################
 #
 # to be used in conjuction with ODESolve.py
@@ -29,25 +28,25 @@ import xy_reactions as xy
 # dD/dt = pi^4 A
 #####################
 
-
+@nb.njit()
 def sep(z):
     return z[0], z[1], z[2], z[3:]
 T,t,eta,A = sep(np.arange(12))
 
 
 #creates array of 12 dependent variables
+@nb.njit()
 def depvar(T,t,eta,A):
     return np.concatenate((np.array([T,t,eta]), A))
 
 
-
+@nb.njit()
 def f(a,y,p):
     T, t, eta, A = sep(y)
     nB = eta*(3/2)*zeta3*T**3
 
   
-    Gamma_f_xg, Gamma_r_xg = xg.Gammaxg(T, eta, A[nse.P_INDEX], A[nse.N_INDEX])
-    Gamma_f_xy, Gamma_r_xy = xy.Gammaxy(T, eta, A[nse.P_INDEX], A[nse.N_INDEX])
+    Gamma_f, Gamma_r = xg.Gamma(T, eta, A[nse.P_INDEX], A[nse.N_INDEX])
   
     d=np.zeros(9)
     der=np.zeros(3)
@@ -84,24 +83,14 @@ def f(a,y,p):
     if (p==2):
         for i in range(xg.Nrxn):
             
-            d[xg.fwd1[i]] -= A[xg.fwd1[i]]*A[xg.fwd2[i]]*Gamma_f_xg[i]
-            d[xg.fwd1[i]] += A[xg.rev[i]]*Gamma_r_xg[i]
-            d[xg.fwd2[i]] -= A[xg.fwd1[i]]*A[xg.fwd2[i]]*Gamma_f_xg[i]
-            d[xg.fwd2[i]] += A[xg.rev[i]]*Gamma_r_xg[i]
-            d[xg.rev[i]] +=A[xg.fwd1[i]]*A[xg.fwd2[i]]*Gamma_f_xg[i]
-            d[xg.rev[i]] -= A[xg.rev[i]]*Gamma_r_xg[i]
-        
-        for j in range(xy.Nrxn):
-            d[xy.fwd1[j]] -= A[xy.fwd1[j]]*A[xy.fwd2[j]]*Gamma_f_xy[j]
-            d[xy.fwd1[j]] += A[xy.rev1[j]]*A[xy.rev2[j]]*Gamma_r_xy[j]
-            d[xy.fwd2[j]] -= A[xy.fwd1[j]]*A[xy.fwd2[j]]*Gamma_f_xy[j]
-            d[xy.fwd2[j]] += A[xy.rev1[j]]*A[xy.rev2[j]]*Gamma_r_xy[j]
-            d[xy.rev1[j]] += A[xy.fwd1[j]]*A[xy.fwd2[j]]*Gamma_f_xy[j]
-            d[xy.rev1[j]] -= A[xy.rev1[j]]*A[xy.rev2[j]]*Gamma_r_xy[j]
-            d[xy.rev2[j]] += A[xy.fwd1[j]]*A[xy.fwd2[j]]*Gamma_f_xy[j]
-            d[xy.rev2[j]] -= A[xy.rev1[j]]*A[xy.rev2[j]]*Gamma_r_xy[j]
-        
-            d = linearize(A, d, der[1], a, weak.Npntot(T,a), weak.Nnptot(T,a), Gamma_f_xg, Gamma_r_xg, xg.indexes_xg, Gamma_f_xy, Gamma_r_xy, xy.indexes_xy)
+            d[xg.fwd1[i]] -= A[xg.fwd1[i]]*A[xg.fwd2[i]]*Gamma_f[i]
+            d[xg.fwd1[i]] += A[xg.rev[i]]*Gamma_r[i]
+            d[xg.fwd2[i]] -= A[xg.fwd1[i]]*A[xg.fwd2[i]]*Gamma_f[i]
+            d[xg.fwd2[i]] += A[xg.rev[i]]*Gamma_r[i]
+            d[xg.rev[i]] +=A[xg.fwd1[i]]*A[xg.fwd2[i]]*Gamma_f[i]
+            d[xg.rev[i]] -= A[xg.rev[i]]*Gamma_r[i]
+
+        d = linearize(A, d, der[1], a, weak.Npntot(T,a), weak.Nnptot(T,a), Gamma_f, Gamma_r, xg.indexes)
   
     return depvar(der[0], der[1], der[2], d*der[1])
         
