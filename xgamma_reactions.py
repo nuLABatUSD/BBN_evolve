@@ -1,6 +1,7 @@
 from constants import zeta3,  MeVtoT9, cmgstoMeV, mN
 import nseabundance as nse
 import numpy as np
+import numba as nb
 
 Nrxn = 11
 
@@ -10,7 +11,7 @@ rev = np.zeros(Nrxn, dtype=int)
 
 
 PNGD_INDEX = 0
-
+@nb.njit()
 def pngd(T):
     T9 = T*MeVtoT9
     if T9<=1.5:
@@ -25,7 +26,7 @@ rev[PNGD_INDEX] = nse.H2_INDEX
 
 
 TPGA_INDEX = 1
-
+@nb.njit()
 def tpga(T):
     T9 = T*MeVtoT9
     F = T9**(-2/3)*2.2e4*np.exp(-3.869/(T9**(1/3)))*((T9**(1/3))*0.108+1.+(T9**(2/3))*1.68+T9*1.26+(T9**(4/3))*0.551+(T9**(5/3))*1.06)
@@ -37,7 +38,7 @@ rev[TPGA_INDEX] = nse.HE4_INDEX
 
 
 DNGT_INDEX = 2
-
+@nb.njit()
 def dngt(T):
     T9 = T*MeVtoT9
     F = (T9*18.9+1)*66.2
@@ -49,7 +50,7 @@ rev[DNGT_INDEX] = nse.H3_INDEX
 
 
 HE3NGA_INDEX = 3
-
+@nb.njit()
 def he3nga(T):
     T9 = T*MeVtoT9
     F = (T9*905.+1.)*6.62
@@ -61,7 +62,7 @@ rev[HE3NGA_INDEX] = nse.HE4_INDEX
 
 
 LI6NGLI7_INDEX = 4
-
+@nb.njit()
 def li6ngli7(T):
     T9 = T*MeVtoT9
     F = 5100
@@ -73,7 +74,7 @@ rev[LI6NGLI7_INDEX] = nse.LI7_INDEX
 
 
 LI6PGBE7_INDEX = 5
-
+@nb.njit()
 def li6pgbe7(T):
     T9 = T*MeVtoT9
     F = 1.25e6*(T9**(-2/3))*np.exp(-8.415/(T9**(1/3)))*(1.-0.252*T9+5.19e-2*T9*T9-2.92e-3*T9*T9*T9)
@@ -84,7 +85,7 @@ fwd2[LI6PGBE7_INDEX] = nse.P_INDEX
 rev[LI6PGBE7_INDEX] = nse.BE7_INDEX
 
 DAGLI6_INDEX = 6
-
+@nb.njit()
 def dagli6(T):
     T9 = T*MeVtoT9
     F = 1.482e1*(T9**(-2./3.))*np.exp(-7.435/(T9**(1./3.)))*(1.+6.572*T9+7.6e-2*T9*T9+2.48e-2*T9*T9*T9)+8.28e1*(T9**(-3./2.))*np.exp(-7.904/T9)
@@ -96,7 +97,7 @@ rev[DAGLI6_INDEX] = nse.LI6_INDEX
 
 
 TAGLI7_INDEX = 7
-
+@nb.njit()
 def tagli7(T):
     T9 = T*MeVtoT9
     if T9<2.5:
@@ -111,7 +112,7 @@ rev[TAGLI7_INDEX] = nse.LI7_INDEX
 
 
 HE3AGBE7_INDEX = 8
-
+@nb.njit()
 def he3agbe7(T):
     T9 = T*MeVtoT9
     if T9<=100:
@@ -126,7 +127,7 @@ rev[HE3AGBE7_INDEX] = nse.BE7_INDEX
 
 
 HE3TGLI6_INDEX = 9
-
+@nb.njit()
 def he3tgli6(T):
     T9 = T*MeVtoT9
     F = .2201e6*(T9**(-2/3))*np.exp(-7.73436/(T9**(1./3.)))*(1.+5.38722e-2*(T9**(1./3.))-.214*(1.+.377*(T9**(1./3.)))*(T9**(2./3.))+.2733*(1.+.959*(T9**(1./3.)))*(T9**(4./3.))-1.53e-2*(1.+.959*(T9**(1./3.)))*T9*T9)*(1.-.213646*(T9**(2./3.))+.136643*(T9**(4./3.))-7.65244e-3*T9*T9)
@@ -138,7 +139,7 @@ rev[HE3TGLI6_INDEX] = nse.LI6_INDEX
 
 
 DPGHE3_INDEX = 10
-
+@nb.njit()
 def dpghe3(T):
     T9 = T*MeVtoT9
     F = T9**(2/3)*np.exp(1.29043/(T9**(1/3)))*(-15.7097+126.821*T**(1/3)-206.509*T9**(2/3)-721.914*T9+2120.73*T9**(4/3)-369.613*T9**(5/3)+173.239*T9**2+127.838*T9**(7/3)+100.688*T9**(8/3)-77.371*t9**3)
@@ -155,10 +156,11 @@ indexes_xg[:,1] = fwd2
 indexes_xg[:,2] = rev
 
 
-
-def Gammaxg(T,eta,Yp,Yn):
+@nb.njit()
+def Gammaxg(T,eta):
     nB = eta*(3/2)*zeta3*T**3
-    A_NSE = nse.nse(T, eta, Yp, Yn)
+    epsilon = (1/2)*((2*np.pi)/(mN*T))**(3/2)
+    #A_NSE = nse.nse(T, eta)
     Gamma_f = np.zeros(Nrxn)
     Gamma_r = np.zeros(Nrxn)
     Gamma_f[PNGD_INDEX] = pngd(T)*nB
@@ -172,7 +174,7 @@ def Gammaxg(T,eta,Yp,Yn):
     Gamma_f[HE3AGBE7_INDEX] = he3agbe7(T)*nB
     Gamma_f[HE3TGLI6_INDEX] = he3tgli6(T)*nB
     for i in range(Nrxn):
-        Gamma_r[i] = Gamma_f[i]*((A_NSE[fwd1[i]]*A_NSE[fwd2[i]])/A_NSE[rev[i]])
+        Gamma_r[i] = Gamma_f[i]*(1/2)*((nse.g[fwd1[i]]*nse.g[fwd2[i]])/nse.g[rev[i]])*((nse.A[fwd1[i]]*nse.A[fwd2[i]])/nse.A[rev[i]])**(3/2)*epsilon**(-1)*np.exp((nse.B[fwd1[i]]+nse.B[fwd2[i]]-nse.B[rev[i]])/T)
     return Gamma_f, Gamma_r
 
 

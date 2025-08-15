@@ -2,6 +2,7 @@ from constants import zeta3,  MeVtoT9, cmgstoMeV, mN
 import nseabundance as nse
 import numpy as np
 from numpy import sqrt, exp
+import numba as nb
 
 Nrxn = 13
 
@@ -11,6 +12,7 @@ rev1 = np.zeros(Nrxn, dtype=int)
 rev2 = np.zeros(Nrxn, dtype=int)
 
 HE3NPT_INDEX = 0
+@nb.njit()
 def he3npt(T):
     T9 = T*MeVtoT9
     if T9<2.5:
@@ -25,6 +27,7 @@ rev2[HE3NPT_INDEX] = nse.P_INDEX
 
 
 BE7NPLI7_INDEX = 1
+@nb.njit()
 def be7npli7(T):
     T9 = T*MeVtoT9
     if T9<2.5:
@@ -39,6 +42,7 @@ rev2[BE7NPLI7_INDEX] = nse.P_INDEX
 
 
 LI6NAT_INDEX = 2
+@nb.njit()
 def li6nat(T):
     T9 = T*MeVtoT9
     F = pow(T9,-1.5)*2.54e9*exp(-2.39/T9)+(1.-pow(T9/(T9*49.18+1.),1.5)*0.261/pow(T9,1.5))*1.68e8
@@ -50,6 +54,7 @@ rev2[LI6NAT_INDEX] = nse.H3_INDEX
 
 
 BE7NAA_INDEX = 3
+@nb.njit()
 def be7naa(T):
     T9 = T*MeVtoT9
     if T9<10:
@@ -65,6 +70,7 @@ rev2[BE7NAA_INDEX] = nse.HE4_INDEX
 
 
 LI6PAHE3_INDEX = 4
+@nb.njit()
 def li6pahe3(T):
     T9 = T*MeVtoT9
     if T9<2.5:
@@ -81,6 +87,7 @@ rev2[LI6PAHE3_INDEX] = nse.HE3_INDEX
 
 
 LI7PAA_INDEX = 5
+@nb.njit()
 def li7paa(T):
     T9 = T*MeVtoT9
     if T9<2.5:
@@ -95,6 +102,7 @@ rev2[LI7PAA_INDEX] = nse.HE4_INDEX
 
 
 TDNA_INDEX = 6
+@nb.njit()
 def tdna(T):
     T9 = T*MeVtoT9
     if T9<2.5:
@@ -109,6 +117,7 @@ rev2[TDNA_INDEX] = nse.HE4_INDEX
 
 
 HE3DPA_INDEX = 7
+@nb.njit()
 def he3dpa(T):
     T9 = T*MeVtoT9
     if T9<2.5:
@@ -123,6 +132,7 @@ rev2[HE3DPA_INDEX] = nse.HE4_INDEX
 
 
 LI6DNBE7_INDEX = 8
+@nb.njit()
 def li6dnbe7(T):
     T9 = T*MeVtoT9
     F = 1.48e12*pow(T9,-2./3.)*exp(-10.135/pow(T9,1./3.))
@@ -134,6 +144,7 @@ rev2[LI6DNBE7_INDEX] = nse.BE7_INDEX
 
 
 HE3TDA_INDEX = 9
+@nb.njit()
 def he3tda(T):
     T9 = T*MeVtoT9
     F = 5.46e9*pow(T9/(1.+.128*T9),.8333333)*pow(T9,-3./2.)*exp(-7.733/(pow(T9/(1.+.128*T9),.333333)))
@@ -145,6 +156,7 @@ rev2[HE3TDA_INDEX] = nse.HE4_INDEX
 
 
 LI6DPLI7_INDEX = 10   # confusion about whether P or N is meant to be in products
+@nb.njit()
 def li6dpli7(T):
     T9 = T*MeVtoT9
     F = 1.48e12*pow(T9,-2./3.)*exp(-10.135/pow(T9,1./3.))
@@ -156,9 +168,10 @@ rev2[LI6DPLI7_INDEX] = nse.LI7_INDEX
 
 
 DDNHE3_INDEX = 11
+@nb.njit()
 def ddnhe3(T):
     T9 = T*MeVtoT9
-    F = T9**(-2/3)*np.exp(-T9**(-1/3))*[-1.84664e6+1.22986e7*T9**(1/3)-1.3761e7*T9**(2/3)-6.11628e7*T9+1.3329e8*T9**(4/3)-1.24333e7*T9**(5/3)-2.72404e7*T9**2+8.52947e6*T9**(7/3)+2.2519e6*T9**(8/3)-2.31204e6*T9**3-294342*T9**(10/3)+911550*T9**(11/3)-252211*T9**4]
+    F = T9**(-2/3)*np.exp(-T9**(-1/3))*(-1.84664e6+1.22986e7*T9**(1/3)-1.3761e7*T9**(2/3)-6.11628e7*T9+1.3329e8*T9**(4/3)-1.24333e7*T9**(5/3)-2.72404e7*T9**2+8.52947e6*T9**(7/3)+2.2519e6*T9**(8/3)-2.31204e6*T9**3-294342*T9**(10/3)+911550*T9**(11/3)-252211*T9**4)
     return F*cmgstoMeV*mN
 fwd1[DDNHE3_INDEX] = nse.H2_INDEX
 fwd2[DDNHE3_INDEX] = nse.H2_INDEX
@@ -167,9 +180,10 @@ rev2[DDNHE3_INDEX] = nse.HE3_INDEX
 
 
 DDPT_INDEX = 12
+@nb.njit()
 def ddpt(T):
     T9 = T*MeVtoT9
-    F = T9**(-2/3)*np.exp(-1.06765*T9**(-1/3))*[-5.85032e6+5.23171e7*T9**(1/3)-1.70199e8*T9**(2/3)+2.32242e8*T9-1.18812e8*T9**(4/3)+5.28874e7*T9**(5/3)-9.85542e6*T9**2]
+    F = T9**(-2/3)*np.exp(-1.06765*T9**(-1/3))*(-5.85032e6+5.23171e7*T9**(1/3)-1.70199e8*T9**(2/3)+2.32242e8*T9-1.18812e8*T9**(4/3)+5.28874e7*T9**(5/3)-9.85542e6*T9**2)
     return F*cmgstoMeV*mN
 fwd1[DDPT_INDEX] = nse.H2_INDEX
 fwd2[DDPT_INDEX] = nse.H2_INDEX
@@ -183,10 +197,11 @@ indexes_xy[:,1] = fwd2
 indexes_xy[:,2] = rev1
 indexes_xy[:,3] = rev2
 
-def Gammaxy(T,eta,Yp,Yn):
+
+def Gammaxy(T,eta):
    
     nB = eta*(3/2)*zeta3*T**3
-    A_NSE = nse.nse(T, eta, Yp, Yn)
+    #A_NSE = nse.nse(T, eta)
     Gamma_f = np.zeros(Nrxn)
     Gamma_r = np.zeros(Nrxn)    
     Gamma_f[HE3NPT_INDEX] = he3npt(T)*nB
@@ -204,6 +219,7 @@ def Gammaxy(T,eta,Yp,Yn):
     Gamma_f[DDPT_INDEX] = ddpt(T)*nB
     
     for i in range(Nrxn):
-        Gamma_r[i] = Gamma_f[i]*((A_NSE[fwd1[i]]*A_NSE[fwd2[i]])/(A_NSE[rev1[i]]*A_NSE[rev2[i]]))
+        deltaB = nse.B[fwd1[i]]+nse.B[fwd2[i]]-nse.B[rev2[i]]-nse.B[rev1[i]]
+        Gamma_r[i] = Gamma_f[i]*((nse.g[fwd1[i]]*nse.g[fwd2[i]])/(nse.g[rev1[i]]*nse.g[rev2[i]]))*((nse.A[fwd1[i]]*nse.A[fwd2[i]])/(nse.A[rev1[i]]*nse.A[rev2[i]]))**(3/2)*np.exp(deltaB/T)
    
     return Gamma_f, Gamma_r

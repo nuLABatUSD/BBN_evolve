@@ -29,7 +29,6 @@ import xy_reactions as xy
 # dD/dt = pi^4 A
 #####################
 
-
 def sep(z):
     return z[0], z[1], z[2], z[3:]
 T,t,eta,A = sep(np.arange(12))
@@ -46,8 +45,8 @@ def f(a,y,p):
     nB = eta*(3/2)*zeta3*T**3
 
   
-    Gamma_f_xg, Gamma_r_xg = xg.Gammaxg(T, eta, A[nse.P_INDEX], A[nse.N_INDEX])
-    Gamma_f_xy, Gamma_r_xy = xy.Gammaxy(T, eta, A[nse.P_INDEX], A[nse.N_INDEX])
+    Gamma_f_xg, Gamma_r_xg = xg.Gammaxg(T, eta)
+    Gamma_f_xy, Gamma_r_xy = xy.Gammaxy(T, eta)
   
     d=np.zeros(9)
     der=np.zeros(3)
