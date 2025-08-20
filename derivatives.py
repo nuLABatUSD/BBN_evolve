@@ -100,7 +100,7 @@ def f(a,y,p):
             d[xy.rev2[j]] += A[xy.fwd1[j]]*A[xy.fwd2[j]]*Gamma_f_xy[j]
             d[xy.rev2[j]] -= A[xy.rev1[j]]*A[xy.rev2[j]]*Gamma_r_xy[j]
         
-            d = linearize(A, d, der[1], a, weak.Npntot(T,a), weak.Nnptot(T,a), Gamma_f_xg, Gamma_r_xg, xg.indexes_xg, Gamma_f_xy, Gamma_r_xy, xy.indexes_xy)
+        d = linearize(A, d, der[1], a, weak.Npntot(T,a), weak.Nnptot(T,a), Gamma_f_xg, Gamma_r_xg, xg.indexes_xg, Gamma_f_xy, Gamma_r_xy, xy.indexes_xy)
   
     return depvar(der[0], der[1], der[2], d*der[1])
         

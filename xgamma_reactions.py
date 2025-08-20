@@ -104,7 +104,7 @@ def tagli7(T):
         F = ((0.094614248-4.9273133*T9+99.358965*T9*T9-989.81236*T9*T9*T9+4368.45*(T9**4.)+931.93597**(T9**5.)-391.07855*pow(T9,6.)+159.23101*pow(T9,7.)-34.407594*pow(T9,8.)+3.3919004*pow(T9,9.)+0.017556217*(T9**10.)-0.036253427**(T9**11.)+0.0031118827*(T9**12.)-0.00008714468*(T9**13.))*(T9**(-1./2.)))/(np.exp(8.4e-7*T9)*((1.+1.78616593*T9)**3.))
     else: 
         F = 807.406
-    #return F*cmgstoMeV*mN
+  #  return F*cmgstoMeV*mN
     return 0
 
 fwd1[TAGLI7_INDEX] = nse.H3_INDEX
@@ -132,7 +132,7 @@ HE3TGLI6_INDEX = 9
 def he3tgli6(T):
     T9 = T*MeVtoT9
     F = .2201e6*(T9**(-2/3))*np.exp(-7.73436/(T9**(1./3.)))*(1.+5.38722e-2*(T9**(1./3.))-.214*(1.+.377*(T9**(1./3.)))*(T9**(2./3.))+.2733*(1.+.959*(T9**(1./3.)))*(T9**(4./3.))-1.53e-2*(1.+.959*(T9**(1./3.)))*T9*T9)*(1.-.213646*(T9**(2./3.))+.136643*(T9**(4./3.))-7.65244e-3*T9*T9)
-    #return F*cmgstoMeV*mN
+   # return F*cmgstoMeV*mN
     return 0
 
 fwd1[HE3TGLI6_INDEX] = nse.HE3_INDEX
@@ -161,7 +161,7 @@ indexes_xg[:,2] = rev
 @nb.njit()
 def Gammaxg(T,eta):
     nB = eta*(3/2)*zeta3*T**3
-    epsilon = (1/2)*((2*np.pi)/(mN*T))**(3/2)
+    epsilon = (1/2)*((2*np.pi)/(mN*T))**(3/2)*nB
     #A_NSE = nse.nse(T, eta)
     Gamma_f = np.zeros(Nrxn)
     Gamma_r = np.zeros(Nrxn)
