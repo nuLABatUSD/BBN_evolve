@@ -43,7 +43,8 @@ def depvar(T,t,eta,A):
 @nb.njit()
 def f(a,y,p):
     T, t, eta, A = sep(y)
-    nB = eta*(3/2)*zeta3*T**3
+    n_gamma = (2/np.pi**2)*zeta3*T**3
+    nB = eta*n_gamma
 
   
     Gamma_f, Gamma_r = xg.Gamma(T, eta, A[nse.P_INDEX], A[nse.N_INDEX])

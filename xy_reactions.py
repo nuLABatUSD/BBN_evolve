@@ -207,7 +207,8 @@ indexes_xy[:,3] = rev2
 
 def Gammaxy(T,eta):
    
-    nB = eta*(3/2)*zeta3*T**3
+    n_gamma = (2/np.pi**2)*zeta3*T**3
+    nB = eta*n_gamma
     #A_NSE = nse.nse(T, eta)
     Gamma_f = np.zeros(Nrxn)
     Gamma_r = np.zeros(Nrxn)    
