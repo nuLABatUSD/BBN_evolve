@@ -4,7 +4,10 @@ import numba as nb
 data = np.load("nuclear_data.npy")
 data_T9 = data[0,:]
 
-DPGHE3_INDEX = 1
+dpghe3_index = 1
+ddnhe3_index = 2
+ddpt_index = 3
+
 
 @nb.njit()
 def find_index_below(T9):

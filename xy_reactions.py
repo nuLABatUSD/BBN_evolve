@@ -3,6 +3,7 @@ import nseabundance as nse
 import numpy as np
 from numpy import sqrt, exp
 import numba as nb
+import interpolate_nuclear as intnuc
 
 Nrxn = 13
 
@@ -172,10 +173,11 @@ DDNHE3_INDEX = 11
 @nb.njit()
 def ddnhe3(T):
     T9 = T*MeVtoT9
-    if T9<9.617518190868742:
-        F = T9**(-2/3)*np.exp(-T9**(-1/3))*(-1.84664e6+1.22986e7*T9**(1/3)-1.3761e7*T9**(2/3)-6.11628e7*T9+1.3329e8*T9**(4/3)-1.24333e7*T9**(5/3)-2.72404e7*T9**2+8.52947e6*T9**(7/3)+2.2519e6*T9**(8/3)-2.31204e6*T9**3-294342*T9**(10/3)+911550*T9**(11/3)-252211*T9**4)
-    else:
-        F = 76709397.15703112
+    #if T9<9.617518190868742:
+        #F = T9**(-2/3)*np.exp(-T9**(-1/3))*(-1.84664e6+1.22986e7*T9**(1/3)-1.3761e7*T9**(2/3)-6.11628e7*T9+1.3329e8*T9**(4/3)-1.24333e7*T9**(5/3)-2.72404e7*T9**2+8.52947e6*T9**(7/3)+2.2519e6*T9**(8/3)-2.31204e6*T9**3-294342*T9**(10/3)+911550*T9**(11/3)-252211*T9**4)
+    #else:
+        #F = 76709397.15703112
+    F = intnuc.fitting(T9, intnuc.ddnhe3_index)
     return F*cmgstoMeV*mN
 fwd1[DDNHE3_INDEX] = nse.H2_INDEX
 fwd2[DDNHE3_INDEX] = nse.H2_INDEX
@@ -187,10 +189,11 @@ DDPT_INDEX = 12
 @nb.njit()
 def ddpt(T):
     T9 = T*MeVtoT9
-    if T9<18.29674756074093:
-        F = T9**(-2/3)*np.exp(-1.06765*T9**(-1/3))*(-5.85032e6+5.23171e7*T9**(1/3)-1.70199e8*T9**(2/3)+2.32242e8*T9-1.18812e8*T9**(4/3)+5.28874e7*T9**(5/3)-9.85542e6*T9**2)
-    else:
-        F = 85567388.72783639
+    #if T9<18.29674756074093:
+        #F = T9**(-2/3)*np.exp(-1.06765*T9**(-1/3))*(-5.85032e6+5.23171e7*T9**(1/3)-1.70199e8*T9**(2/3)+2.32242e8*T9-1.18812e8*T9**#(4/3)+5.28874e7*T9**(5/3)-9.85542e6*T9**2)
+    #else:
+        #F = 85567388.72783639
+    F = intnuc.fitting(T9,intnuc.ddpt_index)
     return F*cmgstoMeV*mN
 fwd1[DDPT_INDEX] = nse.H2_INDEX
 fwd2[DDPT_INDEX] = nse.H2_INDEX

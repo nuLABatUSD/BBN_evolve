@@ -2,6 +2,7 @@ from constants import zeta3,  MeVtoT9, cmgstoMeV, mN
 import nseabundance as nse
 import numpy as np
 import numba as nb
+import interpolate_nuclear as intnuc
 
 Nrxn = 11
 
@@ -148,10 +149,11 @@ DPGHE3_INDEX = 10
 @nb.njit()
 def dpghe3(T):
     T9 = T*MeVtoT9
-    if T9<11.833215726741455:
-        F = T9**(2/3)*np.exp(1.29043/(T9**(1/3)))*(-15.7097+126.821*T**(1/3)-206.509*T9**(2/3)-721.914*T9+2120.73*T9**(4/3)-369.613*T9**(5/3)+173.239*T9**2+127.838*T9**(7/3)+100.688*T9**(8/3)-77.371*T9**3)
-    else:
-        F = 320488.90262975596
+    #if T9<11.833215726741455:
+        #F = T9**(2/3)*np.exp(1.29043/(T9**(1/3)))*(-15.7097+126.821*T**(1/3)-206.509*T9**(2/3)-721.914*T9+2120.73*T9**(4/3)-369.613*T9**(5/3)+173.239*T9**2+127.838*T9**(7/3)+100.688*T9**(8/3)-77.371*T9**3)
+    #else:
+        #F = 320488.90262975596
+    F = intnuc.fitting(T9, intnuc.dpghe3_index)
     return F*cmgstoMeV*mN
 
 fwd1[DPGHE3_INDEX] = nse.H2_INDEX
