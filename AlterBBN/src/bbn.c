@@ -2279,7 +2279,7 @@ int nucl_single(struct relicparam* paramrelic, double ratioH[NNUC+1], struct err
 				if(paramrelic->err==0){
                     double f[NNUCREACMAX+1];
                     if(T<=27.*K_to_eV) rate_all(f,T/K_to_eV,paramrelic,paramerror);
-                    fprintf(output,"%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e\n",t/s_to_GeV,a,T/K_to_eV,Tnu/K_to_eV,0., f[20],Y[5],Y[4],Y[1],Y[2],Y[3],Y[6],Y[8],h_eta/(M_u*g_to_GeV*2.*zeta3/pow(pi,2.)));}
+                    fprintf(output,"%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e\n",t/s_to_GeV,a,T/K_to_eV,Tnu/K_to_eV,0., f[12],Y[5],Y[4],Y[1],Y[2],Y[3],Y[6],Y[8],h_eta/(M_u*g_to_GeV*2.*zeta3/pow(pi,2.)));}
 #endif
 					
 				t=t_sav+dt;
