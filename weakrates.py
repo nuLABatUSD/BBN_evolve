@@ -1,3 +1,4 @@
+import numba as nb
 import numpy as np
 import matplotlib.pyplot as plt
 x, w = np.polynomial.laguerre.laggauss(50)
@@ -5,28 +6,32 @@ xj, wj = np.polynomial.legendre.leggauss(50)
 import ODESolve_slow as ODE
 from constants import GF, gA, me, hbar, dmnp, mpl
 
+@nb.njit()
 #antineutrino distribution function
 def fanti(E,Tcm):
     fanti=(np.exp(E/Tcm)+1)**(-1)
     return fanti
+@nb.njit()
 
 #electron distribution fucntion
 def fe(E,T):
     fe=(np.exp(E/T)+1)**(-1)
     return fe
 
+@nb.njit()
 #neutrino distributuon fucntion
 def fneutrino(E,Tcm):
     fneutrino=(np.exp(E/Tcm)+1)**(-1)
     return fneutrino
 
+@nb.njit()
 #positron distribution fucntion
 def fpos(E,T):
     fpos=(np.exp(E/T)+1)**(-1)
     return fpos
 
 
-
+@nb.njit()
 #integrand for neutrond ecay rate
 def g(x,T,Tcm):
     delta=dmnp/Tcm
@@ -34,6 +39,7 @@ def g(x,T,Tcm):
     g=(x**2)*(delta-x)*np.sqrt((delta-x)**2-u**2)*(1-fanti(x*Tcm,Tcm))*(1-fe((delta-x)*Tcm,T))
     return g
 
+@nb.njit()
 #integrand for rate antineutrino,electron,proton
 def g_antiep(x,T,Tcm):
     delta=dmnp/Tcm
@@ -41,6 +47,7 @@ def g_antiep(x,T,Tcm):
     g_antiep = x**2*(delta-x)*np.sqrt((delta-x)**2-u**2)*fanti(x*Tcm,Tcm)*fe((delta-x)*Tcm,T)
     return g_antiep
 
+@nb.njit()
 #integrand for rate neutrino,electron,neutron
 def g_neutrinoen(x,T,Tcm):
     delta=dmnp/Tcm
@@ -48,6 +55,7 @@ def g_neutrinoen(x,T,Tcm):
     g_neutrinoen=x**2*(x+delta)*np.sqrt((x+delta)**2-u**2)*fneutrino(x*Tcm,Tcm)*(1-fe((x+delta)*Tcm,T))
     return g_neutrinoen
 
+@nb.njit()
 #integrand for rate for electron,proton
 def g_ep(x,T,Tcm):
     delta=dmnp/Tcm
@@ -55,6 +63,7 @@ def g_ep(x,T,Tcm):
     g_ep=x**2*(x+delta)*np.sqrt((x+delta)**2-u**2)*(1-fneutrino(x*Tcm,Tcm))*fe((x+delta)*Tcm,T)
     return g_ep
 
+@nb.njit()
 #integrand for rate for position, neutron
 def g_posn(x,T,Tcm):
     delta=dmnp/Tcm
@@ -62,6 +71,7 @@ def g_posn(x,T,Tcm):
     g_posn=x**2*(x-delta)*np.sqrt((x-delta)**2-u**2)*(1-fanti(x*Tcm,Tcm))*(fpos((x-delta)*Tcm,T))
     return g_posn
 
+@nb.njit()
 #integrand for rate for antineutron, positron
 def g_antip(x,T,Tcm):
     delta=dmnp/Tcm
@@ -71,7 +81,7 @@ def g_antip(x,T,Tcm):
 
 
 
-
+@nb.njit()
 #Neutron Decay Rate
 def N(T,a):
     Tcm=1/a
@@ -85,6 +95,7 @@ def N(T,a):
         integrand[j] = g(E,T,Tcm)
     return ((GF**2)/(2*np.pi**3))*(1+(3*(gA**2)))*(Tcm**5)*(A/2)*np.sum(wj*integrand)  
 
+@nb.njit()
 #antineutrino,electron,proton Decay Rate
 def N_antiep(T,a):
     Tcm=1/a
@@ -98,6 +109,7 @@ def N_antiep(T,a):
         integrand[j] = g_antiep(E,T,Tcm)
     return ((GF**2)/(2*np.pi**3))*(1+(3*(gA**2)))*(Tcm**5)*(A/2)*np.sum(wj*integrand)  
 
+@nb.njit()
 #neutrino,electron,neutron Decay Rate
 def N_neutrinoen(T,a):
     Tcm=1/a
@@ -112,6 +124,7 @@ def N_neutrinoen(T,a):
         integrand[j] = g_neutrinoen(E,T,Tcm)
     return ((GF**2)/(2*np.pi**3))*(1+(3*(gA**2)))*(Tcm**5)*np.sum(w*integrand*np.exp(x))
 
+@nb.njit()
 #electron,proton Decay Rate
 def N_ep(T,a):
     Tcm=1/a
@@ -126,6 +139,7 @@ def N_ep(T,a):
         integrand[j] = g_ep(E,T,Tcm)
     return ((GF**2)/(2*np.pi**3))*(1+(3*(gA**2)))*(Tcm**5)*np.sum(w*integrand*np.exp(x))  
 
+@nb.njit()
 #positron, neutron decay rate
 def N_posn(T,a):
     Tcm=1/a
@@ -141,6 +155,7 @@ def N_posn(T,a):
         integrand[j] = g_posn(E,T,Tcm)
     return ((GF**2)/(2*np.pi**3))*(1+(3*(gA**2)))*(Tcm**5)*np.sum(w*integrand*np.exp(x)) 
 
+@nb.njit()
 #antineutrino, proton decay rate
 def N_antip(T,a):
     Tcm=1/a
@@ -160,12 +175,13 @@ def N_antip(T,a):
 
 
 
-
+@nb.njit()
 #total neutron to proton rate
 def Nnptot(T,a):
     Nnptot = N_posn(T,a) + N_neutrinoen(T,a) + N(T,a)
     return Nnptot
 
+@nb.njit()
 #total proton to neutron rate
 def Npntot(T,a):
     Npntot = N_antiep(T,a) + N_ep(T,a) + N_antip(T,a)

@@ -744,7 +744,7 @@ int nucl_single(struct relicparam* paramrelic, double ratioH[NNUC+1], struct err
 #ifdef OUTPUT
 	FILE *output;
 	if(paramrelic->err==0) output=fopen("evolution.out","w");
-	if(paramrelic->err==0) fprintf(output,"t (s), a, T (GK), Tnu (GK), photons, baryons, neutrinos, phi (GeV^4), Y(n), Y(p), Y(2H), Y(4He), Y(7Li), eta\n");
+	if(paramrelic->err==0) fprintf(output,"t (s), a, T (GK), Tnu (GK), photons, f, Y(3He), Y(3H), Y(n), Y(p), Y(2H), Y(4He), Y(7Li), eta\n");
 
 //	if(paramrelic->err==0) fprintf(output,"t (s)\t\ta\t\t\tT (GK)\t\tTnu (GK)\tphotons\t\tbaryons\t\tneutrinos\tphi (GeV^4)\tY(n)\t\tY(p)\t\tY(2H)\t\tY(4He)\t\tY(7Li)\t\teta\n");
 #endif
@@ -2276,7 +2276,10 @@ int nucl_single(struct relicparam* paramrelic, double ratioH[NNUC+1], struct err
 				if(paramrelic->phi_model&&rho_phi!=0.) rho_phi=rhophi2;
 				if(paramrelic->phi_model&&rho_phi!=0.) if(rho_phi<1.e-20*pow(pi,2.)/15.*pow(T,4.)) rho_phi=0.;
 #ifdef OUTPUT
-				if(paramrelic->err==0) fprintf(output,"%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e\n",t/s_to_GeV,a,T/K_to_eV,Tnu/K_to_eV,pow(pi,2.)/15.*pow(T,4.),h_eta*pow(T,3.),neutdens(Tnu,paramrelic),rho_phi,Y[1],Y[2],Y[3],Y[6],Y[8],h_eta/(M_u*g_to_GeV*2.*zeta3/pow(pi,2.)));
+				if(paramrelic->err==0){
+                    double f[NNUCREACMAX+1];
+                    if(T<=27.*K_to_eV) rate_all(f,T/K_to_eV,paramrelic,paramerror);
+                    fprintf(output,"%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e,%.5e\n",t/s_to_GeV,a,T/K_to_eV,Tnu/K_to_eV,0., f[12],Y[5],Y[4],Y[1],Y[2],Y[3],Y[6],Y[8],h_eta/(M_u*g_to_GeV*2.*zeta3/pow(pi,2.)));}
 #endif
 					
 				t=t_sav+dt;

@@ -1,5 +1,5 @@
 #NSE abundance
-
+import numba as nb
 import numpy as np
 from constants import zeta3, mN
 
@@ -20,13 +20,18 @@ BE7_INDEX = 6
 LI7_INDEX = 7
 LI6_INDEX = 8
 
+PNGD_INDEX = 0
+TPGA_INDEX = 1
+
+@nb.njit()
 # NSE function
 def nse(T, eta, Yp, Yn):
   
     nse=np.zeros(9)
     
     for i in range(len(nse)):
-        nB = eta*(3/2)*zeta3*T**3
+        n_gamma = (2/np.pi**2)*zeta3*T**3
+        nB = eta*n_gamma
         epsilon=(1/2)*((2*np.pi)/(mN*T))**(3/2)*nB
         nse[i]=(1/2)*Yp**Z[i]*Yn**(A[i]-Z[i])*g[i]*A[i]**(3/2)*epsilon**(A[i]-1)*np.exp(B[i]/T)
         

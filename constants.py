@@ -15,3 +15,7 @@ hbar = 6.58e-22     #ħ
 mN = 940            #nucleon mass
 
 zeta3 = 1.2020569031595942854  #Apery's constant
+
+MeVtoT9 = 11604525006.1657/10**9
+
+cmgstoMeV = 1.52e-16
