@@ -30,7 +30,7 @@ import xy_reactions as xy
 #####################
 
 def dQda(a):
-    Q0=0
+    Q0=6
     return Q0*a**3*np.exp(-a)
 
 def delta_neutrino_energy_density(a):
