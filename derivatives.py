@@ -29,19 +29,19 @@ import xy_reactions as xy
 # dD/dt = pi^4 A
 #####################
 
-def dQda(a, Q0, a0):
+def dQda(a, Q0=0, a0=1):
     if Q0 == 0:
         return 0
     else:
         return Q0*a**3*np.exp(-a/a0)
 
-def delta_neutrino_energy_density(a, rhonu):
+def delta_neutrino_energy_density(a, rhonu=0):
     return 0
 
-def weak_np(T, a, npfact):
+def weak_np(T, a, npfact=1):
     return weak.Nnptot(T,a) * npfact
 
-def weak_pn(T, a, pnfact):
+def weak_pn(T, a, pnfact=1):
     return weak.Npntot(T,a) * pnfact
 
 def sep(z):
