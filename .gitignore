@@ -8,3 +8,5 @@ __pycache__/*
 IntroLabs/.ipynb_checkpoints/
 *.a
 *.ipynb_checkpoints/
+*.npz
+*.png
