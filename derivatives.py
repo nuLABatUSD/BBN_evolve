@@ -8,6 +8,7 @@ import nseabundance as nse
 from BBN_linearize import linearize
 import xgamma_reactions as xg
 import xy_reactions as xy
+import decay_results as decay
 ######################
 #
 # to be used in conjuction with ODESolve.py
@@ -29,20 +30,17 @@ import xy_reactions as xy
 # dD/dt = pi^4 A
 #####################
 
-def dQda(a, Q0=0, a0=1):
-    if Q0 == 0:
-        return 0
-    else:
-        return Q0*a**3*np.exp(-a/a0)
+def dQda(a):
+    return a**3*decay.fitting(1/a, decay.DQDA_INDEX)
 
-def delta_neutrino_energy_density(a, rhonu=0):
-    return 0
+def Delta_neutrino_energy(a):
+    return decay.fitting(1/a, decay.RHONU_FACTOR_INDEX)
 
-def weak_np(T, a, npfact=1):
-    return weak.Nnptot(T,a) * npfact
+def weak_np(T, a):
+    return decay.fitting(1/a, decay.NP_RATE_INDEX)
 
-def weak_pn(T, a, pnfact=1):
-    return weak.Npntot(T,a) * pnfact
+def weak_pn(T, a):
+    return decay.fitting(1/a, decay.PN_RATE_INDEX)
 
 def sep(z):
     return z[0], z[1], z[2], z[3:]
@@ -54,10 +52,9 @@ def depvar(T,t,eta,A):
     return np.concatenate((np.array([T,t,eta]), A))
 
 
-
 def f(a,y,p):
     T, t, eta, A = sep(y)
-    p0, Q0, a0, np_factor, pn_factor, rhonu = p
+    p0 = 2 #, Q0, a0, np_factor, pn_factor, rhonu = p
 #    n_gamma = (2/np.pi**2)*zeta3*T**3
 #    nB = eta*n_gamma
 
@@ -68,11 +65,11 @@ def f(a,y,p):
     d=np.zeros(9)
     der=np.zeros(3)
 
-    der[0] = ((1/T)*(dQda(a, Q0, a0))-3*a**2*ex.sth(T))/(a**3*ex.dsthdT(T))
-    der[1] = (1/a)*((8*np.pi*(ex.ptot(T,a)+delta_neutrino_energy_density(a, rhonu)))/(3*(mpl)**2))**(-1/2)
+    der[0] = ((1/T)*(dQda(a))-3*a**2*ex.sth(T))/(a**3*ex.dsthdT(T))
+    der[1] = (1/a)*((8*np.pi*(ex.ptot(T,a)+Delta_neutrino_energy(a)))/(3*(mpl)**2))**(-1/2)
     der[2] = -3*eta*((1/T)*der[0]+(1/a))
 
-    nprate = A[nse.N_INDEX]*weak_np(T, a, np_factor) - A[nse.P_INDEX]*weak_pn(T, a, pn_factor)
+    nprate = A[nse.N_INDEX]*weak_np(T, a) - A[nse.P_INDEX]*weak_pn(T, a)
     d[nse.P_INDEX] += nprate
     d[nse.N_INDEX] -= nprate
     d[nse.H3_INDEX] = 0
@@ -98,7 +95,7 @@ def f(a,y,p):
             d[xy.rev1[j]] -= rxnrate
             d[xy.rev2[j]] -= rxnrate
         
-        d = linearize(A, d, der[1], a, weak_pn(T, a, pn_factor), weak_np(T, a, np_factor), Gamma_f_xg, Gamma_r_xg, xg.indexes_xg, Gamma_f_xy, Gamma_r_xy, xy.indexes_xy)
+        d = linearize(A, d, der[1], a, weak_pn(T, a), weak_np(T, a), Gamma_f_xg, Gamma_r_xg, xg.indexes_xg, Gamma_f_xy, Gamma_r_xy, xy.indexes_xy)
   
     return depvar(der[0], der[1], der[2], d*der[1])
         
